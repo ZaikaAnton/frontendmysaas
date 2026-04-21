@@ -1,26 +1,37 @@
 import { useSearchParams } from 'react-router-dom';
 import type { FilterFormValues } from '../model/schema';
+import { formatDateOnly, parseDateOnly } from '@/shared/lib/date';
+
+const today = () => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+};
 
 export const useMessageFilter = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const getFilterFromUrl = (): FilterFormValues => ({
+  const filter: FilterFormValues = {
     channel: searchParams.get('channel') || '',
     searchWord: searchParams.get('searchWord') || '',
     dateRange: {
-      from: searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : new Date(),
-      to: searchParams.get('endDate') ? new Date(searchParams.get('endDate')!) : new Date(),
+      from: searchParams.get('startDate') ? parseDateOnly(searchParams.get('startDate')!) : today(),
+
+      to: searchParams.get('endDate') ? parseDateOnly(searchParams.get('endDate')!) : today(),
     },
-  });
+  };
 
   const applyFilter = (data: FilterFormValues) => {
     setSearchParams({
-      channel: data.channel,
-      searchWord: data.searchWord,
-      startDate: data.dateRange.from.toISOString().split('T')[0],
-      endDate: data.dateRange.to.toISOString().split('T')[0],
+      channel: data.channel || '',
+      searchWord: data.searchWord || '',
+      startDate: formatDateOnly(data.dateRange.from),
+      endDate: formatDateOnly(data.dateRange.to),
     });
   };
 
-  return { filter: getFilterFromUrl(), applyFilter };
+  const resetFilter = () => {
+    setSearchParams({});
+  };
+
+  return { filter, applyFilter, resetFilter };
 };

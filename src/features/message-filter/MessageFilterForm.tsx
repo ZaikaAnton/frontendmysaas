@@ -7,7 +7,7 @@ import { filterSchema, type FilterFormValues } from './model/schema';
 import { useMessageFilter } from './lib/useMessageFilter';
 
 export const MessageFilterForm = () => {
-  const { applyFilter, filter: initialFilter } = useMessageFilter();
+  const { applyFilter, filter: initialFilter, resetFilter } = useMessageFilter();
 
   const form = useForm<FilterFormValues>({
     resolver: zodResolver(filterSchema),
@@ -22,6 +22,16 @@ export const MessageFilterForm = () => {
     applyFilter(data);
   };
 
+  const onReset = () => {
+    form.reset({
+      channel: '',
+      searchWord: '',
+      dateRange: initialFilter.dateRange,
+    });
+
+    resetFilter();
+  };
+
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       <Field orientation="horizontal">
@@ -30,7 +40,7 @@ export const MessageFilterForm = () => {
         <FormDateRange name="dateRange" control={form.control} />
 
         <Field orientation="horizontal">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
+          <Button type="button" variant="outline" onClick={onReset}>
             Сбросить
           </Button>
           <Button type="submit">Применить</Button>

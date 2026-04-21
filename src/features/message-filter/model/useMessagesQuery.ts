@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { telegramControllerGetMessagesInRangeOptions } from '@/shared/api';
 import { useMessageFilter } from '../lib/useMessageFilter';
+import { formatDateOnly } from '@/shared/lib/date';
 
 export const useMessagesQuery = () => {
   const { filter } = useMessageFilter();
@@ -8,12 +9,14 @@ export const useMessagesQuery = () => {
   const apiParams = {
     channel: filter.channel,
     searchWord: filter.searchWord,
-    startDate: filter.dateRange.from.toISOString().split('T')[0],
-    endDate: filter.dateRange.to.toISOString().split('T')[0],
+    startDate: formatDateOnly(filter.dateRange.from),
+    endDate: formatDateOnly(filter.dateRange.to),
   };
 
   return useQuery({
-    ...telegramControllerGetMessagesInRangeOptions({ query: apiParams }),
-    enabled: Boolean(apiParams.channel && apiParams.searchWord),
+    ...telegramControllerGetMessagesInRangeOptions({
+      query: apiParams,
+    }),
+    enabled: Boolean(filter.channel && filter.searchWord),
   });
 };
